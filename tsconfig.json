@@ -16,10 +16,11 @@
     "isolatedModules": true,
     "outDir": "tmp",
     "noEmit": true,
-    "types": ["node", "vite/client"],
+    "types": ["node", "vite/client", "vidstack/globals"],
     "paths": {
       "~/*": ["./src/*"]
-    }
+    },
+    
   },
   "files": ["./.eslintrc.cjs"],
   "include": ["src", "./*.d.ts", "./*.config.ts"]

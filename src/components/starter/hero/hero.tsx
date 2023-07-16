@@ -4,23 +4,23 @@ import ImgThunder from "~/media/thunder.png?jsx";
 
 export default component$(() => {
   return (
-    <div class={["container", styles.hero]}>
+    <div >
       <ImgThunder class={styles["hero-image"]} />
       <h1>
         So <span class="highlight">fantastic</span>
         <br />
         to have <span class="highlight">you</span> here
       </h1>
-      <p>Have fun building your App with Qwik.</p>
+      <p class="text-primary">Have fun building your App with Qwik.</p>
       <div class={styles["button-group"]}>
         <button
           onClick$={async () => {
             const defaults = {
               spread: 360,
-              ticks: 70,
-              gravity: 0,
-              decay: 0.95,
-              startVelocity: 30,
+              ticks: 1200,
+              gravity: 5,
+              decay: 0.8,
+              startVelocity: 50,
               colors: ["006ce9", "ac7ff4", "18b6f6", "713fc2", "ffffff"],
               origin: {
                 x: 0.5,

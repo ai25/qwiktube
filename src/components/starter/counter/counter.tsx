@@ -4,6 +4,7 @@ import Gauge from "../gauge";
 
 export default component$(() => {
   const count = useSignal(70);
+  
 
   const setCount = $((newValue: number) => {
     if (newValue < 0 || newValue > 100) {
@@ -13,9 +14,9 @@ export default component$(() => {
   });
 
   return (
-    <div class={styles["counter-wrapper"]}>
+    <div class="my-theme">
       <button
-        class="button-dark button-small"
+        class="text-primary "
         onClick$={() => setCount(count.value - 1)}
       >
         -

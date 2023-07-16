@@ -9,6 +9,7 @@ module.exports = {
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:qwik/recommended",
+    "plugin:tailwindcss/recommended",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -35,8 +36,9 @@ module.exports = {
     "prefer-spread": "off",
     "no-case-declarations": "off",
     "no-console": "off",
-    "@typescript-eslint/no-unused-vars": ["error"],
+    "@typescript-eslint/no-unused-vars": ["warn"],
     "@typescript-eslint/consistent-type-imports": "warn",
     "@typescript-eslint/no-unnecessary-condition": "warn",
+    "prefer-const": "warn",
   },
 };

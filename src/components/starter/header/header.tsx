@@ -1,42 +1,43 @@
-import { component$ } from "@builder.io/qwik";
+import { component$, useContext } from "@builder.io/qwik";
 import { QwikLogo } from "../icons/qwik";
-import styles from "./header.module.css";
+import { useNavigate } from "@builder.io/qwik-city";
+import { ThemeContext } from "~/routes/layout";
+import Link from "~/components/link";
 
 export default component$(() => {
+  const theme = useContext(ThemeContext);
   return (
-    <header class={styles.header}>
-      <div class={["container", styles.wrapper]}>
-        <div class={styles.logo}>
-          <a href="/" title="qwik">
+    <header>
+      <div class="text-primary">
+        <div>
+          <Link href="/" title="qwik">
             <QwikLogo height={50} width={143} />
-          </a>
+          </Link>
         </div>
         <ul>
           <li>
-            <a
-              href="https://qwik.builder.io/docs/components/overview/"
-              target="_blank"
-            >
+            <Link class="text-blue-500" href="/demo/flower">
               Docs
-            </a>
+            </Link>
           </li>
           <li>
-            <a
-              href="https://qwik.builder.io/examples/introduction/hello-world/"
-              target="_blank"
-            >
-              Examples
-            </a>
+            <Link href="/demo/todolist">Examples</Link>
           </li>
           <li>
-            <a
-              href="https://qwik.builder.io/tutorial/welcome/overview/"
-              target="_blank"
-            >
-              Tutorials
-            </a>
+            <Link href="/trending">Trending</Link>
           </li>
         </ul>
+        <div class={`${theme.value} w-full h-full`}>
+          <select
+            class="absolute top-0 right-0 input"
+            onChange$={(e) => (theme.value = e.target.value)}>
+            <option value="monokai">Monokai</option>
+            <option value="dracula">Dracula</option>
+            <option value="kawaii">Kawaii</option>
+            <option value="discord">Discord</option>
+            <option value="github">Github</option>
+          </select>
+        </div>
       </div>
     </header>
   );

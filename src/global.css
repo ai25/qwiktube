@@ -1,37 +1,10 @@
 /**
- * WHAT IS THIS FILE?
- *
- * Globally applied styles. No matter which components are in the page or matching route,
- * the styles in here will be applied to the Document, without any sort of CSS scoping.
- *
+ * Tailwind CSS imports
+ * View the full documentation at https://tailwindcss.com
  */
-
-:root {
-  --qwik-dark-blue: #006ce9;
-  --qwik-light-blue: #18b6f6;
-  --qwik-light-purple: #ac7ff4;
-  --qwik-dark-purple: #713fc2;
-  --qwik-dirty-black: #1d2033;
-  --qwik-dark-background: #151934;
-  --qwik-dark-text: #ffffff;
-}
-
-html {
-  line-height: 1;
-  -webkit-text-size-adjust: 100%;
-  -moz-tab-size: 4;
-  -o-tab-size: 4;
-  tab-size: 4;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-}
-
-body {
-  padding: 0;
-  margin: 0;
-  line-height: inherit;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /**
  * WHAT IS THIS FILE?
@@ -40,17 +13,25 @@ body {
  * the styles in here will be applied to the Document, without any sort of CSS scoping.
  *
  */
-html {
-  -webkit-text-size-adjust: 100%;
-  -moz-tab-size: 4;
-  -o-tab-size: 4;
-  tab-size: 4;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/poppins-500.woff2") format("woff2");
+}
+:root {
+  --qwik-dark-blue: #66D9EF;
+  --qwik-light-blue: #A6E22E;
+  --qwik-light-purple: #F92672;
+  --qwik-dark-purple: #AE81FF;
+  --qwik-dirty-black: #1d2033;
+  --qwik-dark-background: #272822;
+  --qwik-dark-text: #ffffff;
+  font-family: "Poppins", sans-serif;
 }
 
-body {
-  padding: 0;
-  line-height: inherit;
+.btn {
+  @apply text-primary bg-highlight hover:brightness-125 cursor-pointer focus:ring-4 focus:ring-accent1 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 focus:outline-none;
+}
+.input {
+  @apply bg-bg border border-fg focus:ring-2 text-primary text-sm rounded-lg focus:ring-highlight focus:border-highlight block p-2.5 disabled:bg-fg disabled:cursor-not-allowed;
 }
