@@ -125,7 +125,7 @@ export default component$(() => {
   const persistedVideo = useSignal<PipedVideo>();
   const route = useLocation();
   useVisibleTask$(
-    ({}) => {
+    () => {
       persistedVideo.value = getStorageValue(
         "video",
         null,
