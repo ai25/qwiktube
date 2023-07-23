@@ -4,7 +4,7 @@ import { PageLoadingContext } from "~/routes/layout";
 
 export default component$((props:LinkProps) => {
     const loadingContext = useContext(PageLoadingContext)
-    return <Link onClick$={() => loadingContext.value = true} {...props}>
+    return <Link class="hover:text-accent1 hover:underline" onClick$={() => loadingContext.value = true} {...props}>
         <Slot />
     </Link>
 })

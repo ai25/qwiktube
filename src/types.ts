@@ -79,9 +79,9 @@ export interface RelatedStream {
   thumbnail: string
   uploaderName: string
   uploaderUrl: string
-  uploaderAvatar: string
+  uploaderAvatar: string | null
   uploadedDate: string
-  shortDescription: any
+  shortDescription: string | null
   duration: number
   views: number
   uploaded: number
@@ -129,3 +129,40 @@ export interface TrendingStream {
   uploaderVerified: boolean
   isShort: boolean
 }
+
+export interface PipedInstance {
+  name: string
+  api_url: string
+  locations: string
+  version: string
+  up_to_date: boolean
+  cdn: boolean
+  registered: number
+  last_checked: number
+  cache: boolean
+  s3_enabled: boolean
+}
+
+export interface PipedChannelResponse {
+  channel: Channel
+}
+
+export interface Channel {
+  id: string
+  name: string
+  avatarUrl: string
+  bannerUrl: string
+  description: string
+  nextpage: string
+  subscriberCount: number
+  verified: boolean
+  relatedStreams: RelatedStream[]
+  tabs: Tab[]
+}
+
+export interface Tab {
+  name: string
+  data: string
+}
+
+

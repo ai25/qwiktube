@@ -30,8 +30,8 @@
 }
 
 .btn {
-  @apply text-primary bg-highlight hover:brightness-125 cursor-pointer focus:ring-4 focus:ring-accent1 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 focus:outline-none;
+  @apply text-bg1 bg-primary hover:brightness-125 cursor-pointer focus:ring-4 focus:ring-accent1 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 focus:outline-none;
 }
 .input {
-  @apply bg-bg border border-fg focus:ring-2 text-primary text-sm rounded-lg focus:ring-highlight focus:border-highlight block p-2.5 disabled:bg-fg disabled:cursor-not-allowed;
+  @apply bg-bg2 border border-bg2 focus:ring-2 text-bg1 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 disabled:bg-bg2 disabled:cursor-not-allowed;
 }
