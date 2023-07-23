@@ -1,4 +1,4 @@
-import { component$, useContext, useSignal, useTask$, useVisibleTask$ } from "@builder.io/qwik";
+import { component$, useContext, useSignal, useTask$, useVisibleTask$, $ } from "@builder.io/qwik";
 import { useNavigate } from "@builder.io/qwik-city";
 import {
   ThemeContext,
@@ -48,25 +48,26 @@ export default component$(({ instances }: { instances?: PipedInstance[] | Error 
             </svg>
           </Link>
         </div>
-          <Select
+        <Select
           name="theme"
-            value={theme.value ?? ""}
-            onChange$={(v) => {
-              setTheme(v)
-              theme.value = v
-            }}
-            options={[
-              { value: "monokai", label: "Monokai" },
-              { value: "dracula", label: "Dracula" },
-              { value: "kawaii", label: "Kawaii" },
-              { value: "discord", label: "Discord" },
-              { value: "github", label: "Github" },
-            ]}
-           />
+          value={theme.value ?? ""}
+          onChange$={(v) => {
+            //eslint-disable-next-line qwik/valid-lexical-scope
+            setTheme(v);
+            theme.value = v;
+          }}
+          options={[
+            { value: "monokai", label: "Monokai" },
+            { value: "dracula", label: "Dracula" },
+            { value: "kawaii", label: "Kawaii" },
+            { value: "discord", label: "Discord" },
+            { value: "github", label: "Github" },
+          ]}
+        />
 
-
-          {pipedInstances.value &&<Select
-          name="instance"
+        {pipedInstances.value && (
+          <Select
+            name="instance"
             value={
               pipedInstances.value?.find((i) => {
                 let inst = i.api_url === instance.value;
@@ -75,8 +76,9 @@ export default component$(({ instances }: { instances?: PipedInstance[] | Error 
               })?.name ?? `DOWN - ${instance.value}`
             }
             onChange$={(v) => {
-              setInstance(v)
-              instance.value = v
+              //eslint-disable-next-line qwik/valid-lexical-scope
+              setInstance(v);
+              instance.value = v;
             }}
             options={pipedInstances.value?.map((instance) => {
               return {
@@ -84,8 +86,9 @@ export default component$(({ instances }: { instances?: PipedInstance[] | Error 
                 label: instance.name,
               };
             })}
-          />}
-        </div>
+          />
+        )}
+      </div>
     </header>
   );
 });

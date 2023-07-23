@@ -19,10 +19,10 @@
   src: url("/fonts/poppins-500.woff2") format("woff2");
 }
 :root {
-  --qwik-dark-blue: #66D9EF;
-  --qwik-light-blue: #A6E22E;
-  --qwik-light-purple: #F92672;
-  --qwik-dark-purple: #AE81FF;
+  --qwik-dark-blue: #66d9ef;
+  --qwik-light-blue: #a6e22e;
+  --qwik-light-purple: #f92672;
+  --qwik-dark-purple: #ae81ff;
   --qwik-dirty-black: #1d2033;
   --qwik-dark-background: #272822;
   --qwik-dark-text: #ffffff;

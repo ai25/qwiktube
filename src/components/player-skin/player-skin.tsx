@@ -50,24 +50,24 @@ interface PlayerSkinProps {
 export default function PlayerSkin({ video, isMiniPlayer }: PlayerSkinProps) {
   return (
     <div
-      className="absolute inset-0 z-10 flex flex-col justify-between h-full text-white transition-opacity duration-200 ease-linear opacity-0 pointer-events-none can-control:opacity-100"
+      className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col justify-between text-white opacity-0 transition-opacity duration-200 ease-linear can-control:opacity-100"
       role="group"
       aria-label="Media Controls"
     >
       <div className="pointer-events-none absolute inset-0 z-0 h-full w-full bg-gradient-to-t from-black/50 from-5% via-transparent via-50% to-black/20 to-100%" />
       <MediaGesture
-        className="top-0 left-0 z-10 w-full h-full bg-green-500/50"
+        className="left-0 top-0 z-10 h-full w-full bg-green-500/50"
         event="pointerup"
         action="toggle:paused"
       ></MediaGesture>
-      <MediaGesture className="top-0 left-0 w-full h-full" event="dblpointerup" action="toggle:fullscreen" />
-      <MediaGesture className="top-0 left-0 z-10 w-1/5 h-full" event="dblpointerup" action="seek:-10" />
-      <MediaGesture className="top-0 right-0 z-10 w-1/5 h-full" event="dblpointerup" action="seek:10" />
+      <MediaGesture className="left-0 top-0 h-full w-full" event="dblpointerup" action="toggle:fullscreen" />
+      <MediaGesture className="left-0 top-0 z-10 h-full w-1/5" event="dblpointerup" action="seek:-10" />
+      <MediaGesture className="right-0 top-0 z-10 h-full w-1/5" event="dblpointerup" action="seek:10" />
       <MediaControlGroup>
-        <div className="z-10 flex items-center w-full justify-start font-sans text-lg font-normal text-white truncate">
+        <div className="z-10 flex w-full items-center justify-start truncate font-sans text-lg font-normal text-white">
           <p className="truncate">{video?.title}</p>
         </div>
-        <div className="flex items-center justify-end w-max">
+        <div className="flex w-max items-center justify-end">
           <MediaMuteButton className="group peer flex h-10 w-10 items-center justify-center rounded-sm text-white outline-none data-[focus]:ring-4 data-[focus]:ring-primary sm:hidden">
             {/* icons */}
             <MuteIcon className="hidden group-data-[volume=muted]:block" />
@@ -90,7 +90,7 @@ export default function PlayerSkin({ video, isMiniPlayer }: PlayerSkinProps) {
         <PlayIcon className="w-10 h-10 mx-auto" />
       </div> */}
 
-      <div className="flex flex-col w-full max-w-full px-2 pb-2 pointer-events-none shrink can-control:pointer-events-auto">
+      <div className="pointer-events-none flex w-full max-w-full shrink flex-col px-2 pb-2 can-control:pointer-events-auto">
         <div className="flex items-center">
           <MediaTimeSlider
             className="group mx-2.5 flex h-10 w-full items-center"
@@ -109,47 +109,46 @@ export default function PlayerSkin({ video, isMiniPlayer }: PlayerSkinProps) {
             >
               <div className="relative flex flex-col items-center justify-center">
                 <div className="absolute bottom-[-1.6rem] z-50 flex flex-col items-center justify-center gap-1 ">
-                <MediaSliderValue type="pointer" format="time" className="z-50 rounded shadow-sm " />
-                <div className="truncate rounded shadow-sm px-2 text-sm">
-                  <span part="chapter-title" />
-                </div>
+                  <MediaSliderValue type="pointer" format="time" className="z-50 rounded shadow-sm " />
+                  <div className="truncate rounded px-2 text-sm shadow-sm">
+                    <span part="chapter-title" />
+                  </div>
                 </div>
                 <MediaSliderVideo
-                
                   src={video?.videoStreams.find((s) => s.bitrate < 400000)?.url}
                   onError={console.error}
                 />
               </div>
             </div>
           </MediaTimeSlider>
-          <MediaLiveIndicator className="flex items-center justify-center w-10 h-10 text-white not-live:hidden">
-            <div className="px-1 py-px font-sans text-xs font-bold tracking-widest uppercase bg-gray-400 rounded-sm text-slate-800 live-edge:bg-red-500 live-edge:text-white">
+          <MediaLiveIndicator className="flex h-10 w-10 items-center justify-center text-white not-live:hidden">
+            <div className="rounded-sm bg-gray-400 px-1 py-px font-sans text-xs font-bold uppercase tracking-widest text-slate-800 live-edge:bg-red-500 live-edge:text-white">
               live
             </div>
           </MediaLiveIndicator>
         </div>
 
         <div className="flex w-full max-w-full justify-between ">
-          <div className="flex items-center justify-start min-w-0 w-full">
-            <div className="flex max-w-full items-center justify-start w-full">
+          <div className="flex w-full min-w-0 items-center justify-start">
+            <div className="flex w-full max-w-full items-center justify-start">
               <MediaPlayButton
                 className="flex h-10 w-10 min-w-[2.5rem] items-center justify-center rounded-sm text-white outline-none data-[focus]:ring-4 data-[focus]:ring-primary"
                 aria-label="Play"
               >
-                <PlayIcon className="paused:block ended:hidden hidden ring-0" />
-                <PauseIcon className="not-paused:block hidden ring-0" />
-                <ReplayIcon className="ended:block hidden ring-0" />
-              <MediaTooltip className="" style={{ transformOrigin: "50% 100%" }}>
-                <span className="hidden paused:inline">Play</span>
-                <span className="hidden not-paused:inline">Pause</span>
-              </MediaTooltip>
+                <PlayIcon className="hidden ring-0 ended:hidden paused:block" />
+                <PauseIcon className="hidden ring-0 not-paused:block" />
+                <ReplayIcon className="hidden ring-0 ended:block" />
+                <MediaTooltip className="" style={{ transformOrigin: "50% 100%" }}>
+                  <span className="hidden paused:inline">Play</span>
+                  <span className="hidden not-paused:inline">Pause</span>
+                </MediaTooltip>
               </MediaPlayButton>
-              <div className="flex items-center max-w-[8rem] min-w-0 peer sm:w-full">
+              <div className="peer flex min-w-0 max-w-[8rem] items-center sm:w-full">
                 <MediaMuteButton className="group peer hidden h-10 w-10 min-w-0 items-center justify-center rounded-sm text-white outline-none data-[focus]:ring-4 data-[focus]:ring-primary sm:flex">
                   {/* icons */}
-                  <MuteIcon className="hidden group-data-[volume=muted]:block ring-0" />
-                  <VolumeLowIcon className="hidden group-data-[volume=low]:block ring-0" />
-                  <VolumeHighIcon className="hidden group-data-[volume=high]:block ring-0" />
+                  <MuteIcon className="hidden ring-0 group-data-[volume=muted]:block" />
+                  <VolumeLowIcon className="hidden ring-0 group-data-[volume=low]:block" />
+                  <VolumeHighIcon className="hidden ring-0 group-data-[volume=high]:block" />
                   {/* tooltip */}
                   <MediaTooltip className="" style={{ transformOrigin: "50% 100%" }}>
                     <span className="hidden not-muted:inline">Mute</span>
@@ -157,7 +156,7 @@ export default function PlayerSkin({ video, isMiniPlayer }: PlayerSkinProps) {
                   </MediaTooltip>
                 </MediaMuteButton>
                 <MediaVolumeSlider
-                  className="group mr-0 hidden h-10 w-full  flex-1 items-center -scale-x-0 origin-left p-0 transition-all duration-200 data-[hocus]:scale-x-100  group-data-[hocus]:scale-x-100 peer-data-[hocus]:scale-x-100 sm:flex"
+                  className="group mr-0 hidden h-10 w-full  flex-1 origin-left -scale-x-0 items-center p-0 transition-all duration-200 data-[hocus]:scale-x-100  group-data-[hocus]:scale-x-100 peer-data-[hocus]:scale-x-100 sm:flex"
                   trackClass="absolute top-1/2 left-0 z-0 h-1 w-full -translate-y-1/2 bg-[#5a595a] outline-none group-data-[focus]:ring-4 group-data-[focus]:ring-primary"
                   trackFillClass="absolute top-1/2 left-0 z-20 h-1 w-[var(--slider-fill-percent)] -translate-y-1/2 bg-white will-change-[width]"
                   thumbContainerClass="absolute top-0 left-[var(--slider-fill-percent)] z-20 h-full w-5 -translate-x-1/2 group-data-[dragging]:left-[var(--slider-pointer-percent)]"
@@ -169,13 +168,13 @@ export default function PlayerSkin({ video, isMiniPlayer }: PlayerSkinProps) {
                 </MediaVolumeSlider>
               </div>
 
-              <div className="flex min-h-[48px] min-w-0 max-w-full items-center text-xs transition-all duration-200 sm:ml-[-4rem] peer-data-[hocus]:ml-2.5">
+              <div className="flex min-h-[48px] min-w-0 max-w-full items-center text-xs transition-all duration-200 peer-data-[hocus]:ml-2.5 sm:ml-[-4rem]">
                 <MediaTime type="current" className="flex items-center px-1 text-sm text-white" />
                 /
                 <MediaTime type="duration" className="flex items-center px-1 text-sm text-white" />
-                <div className="items-center justify-start hidden overflow-hidden sm:flex">
+                <div className="hidden items-center justify-start overflow-hidden sm:flex">
                   •{" "}
-                  <span className="z-10 max-w-full min-w-0 pl-1 font-sans text-sm font-normal text-white truncate ">
+                  <span className="z-10 min-w-0 max-w-full truncate pl-1 font-sans text-sm font-normal text-white ">
                     {video?.title}
                   </span>
                 </div>
@@ -206,8 +205,8 @@ function FullscreenButton() {
   return (
     <MediaFullscreenButton className="group flex h-10 w-10 items-center justify-center rounded-sm text-white outline-none data-[focus]:ring-4 data-[focus]:ring-primary">
       {/* icons */}
-      <FullscreenIcon className="hidden not-fullscreen:block ring-0" />
-      <FullscreenExitIcon className="hidden fullscreen:block ring-0" />
+      <FullscreenIcon className="hidden ring-0 not-fullscreen:block" />
+      <FullscreenExitIcon className="hidden ring-0 fullscreen:block" />
       {/* tooltip */}
       <MediaTooltip className="tooltip" style={{ transformOrigin: "50% 100%" }}>
         <span className="hidden not-fullscreen:inline">Enter Fullscreen</span>
@@ -229,7 +228,7 @@ function SettingsMenu() {
   return (
     <MediaMenu className="relative inline-block">
       <MediaMenuButton
-        className="flex items-center justify-center w-10 h-10 rounded-sm outline-none group"
+        className="group flex h-10 w-10 items-center justify-center rounded-sm outline-none"
         aria-label="Settings"
       >
         <SettingsIcon className="h-8 w-8 rounded-sm transition-transform duration-200 ease-out group-aria-expanded:rotate-90 group-data-[focus]:ring-4 group-data-[focus]:ring-primary" />
@@ -260,8 +259,8 @@ function CaptionsMenu() {
 function CaptionsMenuButton() {
   return (
     <MediaMenuButton className="group flex cursor-pointer items-center p-2.5 data-[hocus]:bg-white/10 data-[focus]:ring-2 data-[focus]:ring-primary">
-      <ArrowLeftIcon className="hidden w-4 h-4 group-aria-expanded:inline" />
-      <ClosedCaptionsIcon className="w-6 h-6 group-aria-expanded:hidden" />
+      <ArrowLeftIcon className="hidden h-4 w-4 group-aria-expanded:inline" />
+      <ClosedCaptionsIcon className="h-6 w-6 group-aria-expanded:hidden" />
       <span className="ml-1.5">Captions</span>
       <span className="ml-auto text-white/50" slot="hint"></span>
       <ChevronRightIcon className="ml-0.5 h-4 w-4 text-white/50 group-aria-disabled:opacity-0 group-aria-expanded:hidden" />
@@ -285,8 +284,8 @@ function QualityMenu() {
 function QualityMenuButton() {
   return (
     <MediaMenuButton className="group flex cursor-pointer items-center p-2.5 data-[hocus]:bg-white/10 data-[focus]:ring-2 data-[focus]:ring-primary">
-      <ArrowLeftIcon className="hidden w-4 h-4 group-aria-expanded:inline" />
-      <SettingsMenuIcon className="w-6 h-6 group-aria-expanded:hidden" />
+      <ArrowLeftIcon className="hidden h-4 w-4 group-aria-expanded:inline" />
+      <SettingsMenuIcon className="h-6 w-6 group-aria-expanded:hidden" />
       <span className="ml-1.5">Quality</span>
       <span className="ml-auto text-white/50" slot="hint"></span>
       <ChevronRightIcon className="ml-0.5 h-4 w-4 text-white/50 group-aria-disabled:opacity-0 group-aria-expanded:hidden" />
@@ -311,8 +310,8 @@ function PlaybackRateMenu() {
 function PlaybackRateMenuButton() {
   return (
     <MediaMenuButton className="group flex cursor-pointer items-center p-2.5 data-[hocus]:bg-white/10 data-[focus]:ring-2 data-[focus]:ring-primary">
-      <ArrowLeftIcon className="hidden w-4 h-4 group-aria-expanded:inline" />
-      <OdometerIcon className="w-6 h-6 group-aria-expanded:hidden" />
+      <ArrowLeftIcon className="hidden h-4 w-4 group-aria-expanded:inline" />
+      <OdometerIcon className="h-6 w-6 group-aria-expanded:hidden" />
       <span className="ml-1.5">Speed</span>
       <span className="ml-auto text-white/50" slot="hint"></span>
       <ChevronRightIcon className="ml-0.5 h-4 w-4 text-white/50 group-aria-disabled:opacity-0 group-aria-expanded:hidden" />
@@ -331,10 +330,10 @@ function RecommendedVideosMenu({ videos }: { videos?: RelatedStream[] }) {
             className="flex items-center p-2.5 data-[hocus]:bg-white/10 data-[focus]:ring-2 data-[focus]:ring-primary"
           >
             <div
-              className="w-16 rounded-md h-9 shrink-0 bg-bg1"
+              className="h-9 w-16 shrink-0 rounded-md bg-bg1"
               style={{ backgroundImage: `url(${video.thumbnail})` }}
             />
-            <div className="flex flex-col ml-2 grow">
+            <div className="ml-2 flex grow flex-col">
               <div className="text-sm text-white">{video.title}</div>
               <div className="text-xs text-white/50">{video.uploaderName}</div>
             </div>
@@ -348,7 +347,7 @@ function RecommendedVideosMenu({ videos }: { videos?: RelatedStream[] }) {
 function RecommendedVideosMenuButton() {
   return (
     <MediaMenuButton
-      className="flex items-center justify-center w-10 h-10 rounded-sm outline-none group"
+      className="group flex h-10 w-10 items-center justify-center rounded-sm outline-none"
       aria-label="Recommended Videos"
     >
       <PlaylistIcon className="h-8 w-8 rounded-sm group-data-[focus]:ring-4 group-data-[focus]:ring-primary" />
@@ -358,9 +357,9 @@ function RecommendedVideosMenuButton() {
 
 function BufferingIndicator() {
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center w-full h-full pointer-events-none">
+    <div className="pointer-events-none absolute inset-0 z-50 flex h-full w-full items-center justify-center">
       <svg
-        className="w-24 h-24 text-white transition-opacity duration-200 ease-linear opacity-0 buffering:animate-spin buffering:opacity-100"
+        className="h-24 w-24 text-white opacity-0 transition-opacity duration-200 ease-linear buffering:animate-spin buffering:opacity-100"
         fill="none"
         viewBox="0 0 120 120"
         aria-hidden="true"
@@ -390,7 +389,7 @@ function ChaptersMenu({ chapters }: { chapters?: Chapter[] | null }) {
     <MediaMenu className="relative inline-block">
       {/* Menu Button */}
       <MediaMenuButton
-        className="flex items-center justify-center w-10 h-10 rounded-sm outline-none group"
+        className="group flex h-10 w-10 items-center justify-center rounded-sm outline-none"
         aria-label="Chapters"
       >
         <ChaptersIcon className="h-8 w-8 rounded-sm transition-transform duration-200 ease-out group-data-[focus]:ring-4 group-data-[focus]:ring-primary" />

@@ -12,7 +12,14 @@ import {
 import { routeAction$, routeLoader$, server$, useLocation } from "@builder.io/qwik-city";
 import { QPlayer } from "~/components/player";
 import { PipedVideo } from "~/types";
-import { DBContext, InstanceContext, PlayerContext, PreferencesContext, getStorageValue, setStorageValue } from "../layout";
+import {
+  DBContext,
+  InstanceContext,
+  PlayerContext,
+  PreferencesContext,
+  getStorageValue,
+  setStorageValue,
+} from "../layout";
 import VideoCard from "~/components/VideoCard";
 import Description from "~/components/Description";
 import { on } from "events";
@@ -51,10 +58,11 @@ export default component$(() => {
   const videoLoaded = useSignal(false);
   const preferences = useContext(PreferencesContext);
   const instance = useContext(InstanceContext);
-  const db = useContext(DBContext)
+  const db = useContext(DBContext);
 
   useVisibleTask$(() => {
-    console.log("visible",db.value);
+    //eslint-disable-next-line qwik/valid-lexical-scope
+    console.log("visible", db.value);
   });
 
   const vd = useResource$<any>(async ({ track, cleanup }) => {
@@ -177,17 +185,21 @@ export default component$(() => {
   // });
 
   return (
-    <div >
+    <div>
       <Resource
         value={vd}
         onResolved={(vdo) => {
           onResolved(vdo);
           return (
             <div class="min-h-full">
-              {video.value &&<Description video={video.value} />}
-              <div q:slot="recommended" class="mx-2 relative" ><div class="absolute">{video.value?.relatedStreams?.map((stream) => {
-                return <VideoCard key={stream.url} v={stream} />;
-              })}</div></div>
+              {video.value && <Description video={video.value} />}
+              <div q:slot="recommended" class="mx-2 relative">
+                <div class="absolute">
+                  {video.value?.relatedStreams?.map((stream) => {
+                    return <VideoCard key={stream.url} v={stream} />;
+                  })}
+                </div>
+              </div>
             </div>
           );
         }}

@@ -19,8 +19,7 @@
     "types": ["node", "vite/client", "vidstack/globals"],
     "paths": {
       "~/*": ["./src/*"]
-    },
-    
+    }
   },
   "files": ["./.eslintrc.cjs"],
   "include": ["src", "./*.d.ts", "./*.config.ts"]

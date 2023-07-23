@@ -1,15 +1,10 @@
 import { component$, useSignal, useTask$ } from "@builder.io/qwik";
 import { server$, type DocumentHead } from "@builder.io/qwik-city";
 
-
-
 export default component$(() => {
   const theme = useSignal("monokai");
-  
-  return (
-    <>
-    </>
-  );
+
+  return <></>;
 });
 
 export const head: DocumentHead = {

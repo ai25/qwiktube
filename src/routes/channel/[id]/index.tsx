@@ -1,40 +1,43 @@
 import { component$, useVisibleTask$ } from "@builder.io/qwik";
 import { routeLoader$ } from "@builder.io/qwik-city";
 
-export const useChannelLoader = routeLoader$(
-    async ({params} ) => {
-      console.log("PARAMS", params);
-      const id = params.id
-      console.log("ID", id);
-      if(!id) return;
-        const channel = await fetch(
-            `https://pipedapi.kavin.rocks/channel/${id}`
-        ).then((res) => res.json()).catch((err) => {
-            console.log("CHANNEL ERROR", err);
-            return err as Error;
-        });
-        return { channel };
-        }
-    );
+export const useChannelLoader = routeLoader$(async ({ params }) => {
+  console.log("PARAMS", params);
+  const id = params.id;
+  console.log("ID", id);
+  if (!id) return;
+  const channel = await fetch(`https://pipedapi.kavin.rocks/channel/${id}`)
+    .then((res) => res.json())
+    .catch((err) => {
+      console.log("CHANNEL ERROR", err);
+      return err as Error;
+    });
+  return { channel };
+});
 export default component$(() => {
   const channel = useChannelLoader();
   console.log("CHANNEL", channel.value);
-  useVisibleTask$(() => {
-    console.log("CHANNEL", channel.value);
-  }, {strategy: "document-ready"});
+  useVisibleTask$(
+    () => {
+      console.log("CHANNEL", channel.value);
+    },
+    { strategy: "document-ready" }
+  );
   return (
     <div>
-      <div class="flex justify-center place-items-center">
-        <img
-          height="48"
-          width="48"
-          class="rounded-full m-1"
-          src={channel.value?.channel.avatarUrl}
-        />
+      <div class="flex place-items-center justify-center">
+        <img alt="" height="48" width="48" class="m-1 rounded-full" src={channel.value?.channel.avatarUrl} />
         <h1>{channel.value?.channel.name}</h1>
         {/* <svg class="ml-1.5 !text-3xl" v-if="channel.verified" icon="check" /> */}
       </div>
-      <img width={843} height={145} src={channel.value?.channel.bannerUrl} class="w-full pb-1.5" loading="lazy" />
+      <img
+        alt=""
+        width={843}
+        height={145}
+        src={channel.value?.channel.bannerUrl}
+        class="w-full pb-1.5"
+        loading="lazy"
+      />
       <p class="whitespace-pre-wrap">
         <span v-html="purifyHTML(rewriteDescription(channel.description))" />
       </p>
@@ -50,13 +53,14 @@ export default component$(() => {
         v-if="channel.id"
         href="`${apiUrl()}/feed/unauthenticated/rss?channels=${channel.id}`"
         target="_blank"
-        class="btn flex-col mx-3">
+        class="btn mx-3 flex-col"
+      >
         {/* <font-awesome-icon icon="rss" /> */}
       </a>
 
       {/* <WatchOnYouTubeButton :link="`https://youtube.com/channel/${this.channel.id}`" /> */}
 
-      <div class="flex mt-4 mb-2">
+      <div class="mb-2 mt-4 flex">
         {/* <button
                 v-for="(tab, index) in tabs"
                 :key="tab.name"

@@ -10,12 +10,9 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "plugin:qwik/recommended",
     "plugin:tailwindcss/recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
     "plugin:prettier/recommended",
     "prettier",
-
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -47,7 +44,5 @@ module.exports = {
     "@typescript-eslint/no-unnecessary-condition": "warn",
     "prefer-const": "warn",
     "no-unused-vars": "off",
-    "react/prop-types": "off",
-
   },
 };

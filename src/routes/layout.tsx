@@ -202,6 +202,7 @@ export default component$(() => {
       },
     });
     console.log("setting db visible");
+    //eslint-disable-next-line qwik/valid-lexical-scope
     db.value = noSerialize(odb);
   });
   useContextProvider(DBContext, db);

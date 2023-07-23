@@ -1,20 +1,13 @@
 import { component$ } from "@builder.io/qwik";
 
-export default component$<{ label: string; onChange$: () => void }>(
-  ({ label, onChange$ }) => {
-    return (
-      <label for={label} class="flex items-center cursor-pointer">
-        <div class="relative">
-          <input
-            onChange$={onChange$}
-            type="checkbox"
-            id={label}
-            class="sr-only peer"
-          />
-          <div class="block bg-bg1 ring-2 ring-bg2 peer-checked:ring-bg peer-checked:bg-primary w-14 h-8 rounded-full focus:ring-2 focus:ring-primary"></div>
-          <div class="peer-checked:translate-x-full absolute left-1 top-1 bg-bg2 peer-checked:bg-accent1 shadow shadow-black/50 w-6 h-6 rounded-full transition duration-200"></div>
-        </div>
-      </label>
-    );
-  }
-);
+export default component$<{ label: string; onChange$: () => void }>(({ label, onChange$ }) => {
+  return (
+    <label for={label} class="flex cursor-pointer items-center">
+      <div class="relative">
+        <input onChange$={onChange$} type="checkbox" id={label} class="peer sr-only" />
+        <div class="peer-checked:ring-bg block h-8 w-14 rounded-full bg-bg1 ring-2 ring-bg2 focus:ring-2 focus:ring-primary peer-checked:bg-primary"></div>
+        <div class="absolute left-1 top-1 h-6 w-6 rounded-full bg-bg2 shadow shadow-black/50 transition duration-200 peer-checked:translate-x-full peer-checked:bg-accent1"></div>
+      </div>
+    </label>
+  );
+});
