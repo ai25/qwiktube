@@ -10,7 +10,6 @@ export default component$(({ v }: { v: RelatedStream & { progress?: number } }) 
   const video = useSignal(v);
 
   useVisibleTask$(async ({ track }) => {
-    console.log(v, "v", video.value, "video");
     //eslint-disable-next-line qwik/valid-lexical-scope
     if (!db.value) return;
     //eslint-disable-next-line qwik/valid-lexical-scope

@@ -10,7 +10,6 @@ import {
   useVisibleTask$,
 } from "@builder.io/qwik";
 import { routeAction$, routeLoader$, server$, useLocation } from "@builder.io/qwik-city";
-import { QPlayer } from "~/components/player";
 import { PipedVideo } from "~/types";
 import {
   DBContext,
@@ -38,7 +37,7 @@ export async function fetchWithTimeout(
   const controller = new AbortController();
   const id = setTimeout(() => {
     console.log("aborting");
-    controller.abort();
+    controller.abort(`Request exceeded timeout of ${timeout}ms.`);
   }, timeout);
 
   const response = await fetch(resource, {
@@ -78,7 +77,7 @@ export default component$(() => {
     console.log("fetching video", v.value);
     try {
       const res = await fetchWithTimeout(`${apiInstance}/streams/${id}`, {
-        timeout: 5000,
+        timeout: 8000,
         signal: abortController.signal,
       });
       console.log(res.status, res.statusText, "status");
@@ -93,7 +92,6 @@ export default component$(() => {
       };
     }
   });
-  console.log(vd, "vd");
 
   function onResolved(data: any) {
     if (data?.error) {

@@ -1,48 +1,38 @@
-/** @jsxImportSource react */
-
 import "vidstack/styles/defaults.css";
 import "vidstack/styles/community-skin/video.css";
+import { defineCustomElements } from "vidstack/elements";
 
-import { qwikify$ } from "@builder.io/qwik-react";
+// import { qwikify$ } from "@builder.io/qwik-react";
 
-import {
-  MediaBufferingIndicator,
-  MediaCaptions,
-  MediaChaptersMenuItems,
-  MediaCommunitySkin,
-  MediaGesture,
-  MediaLiveIndicator,
-  MediaMenu,
-  MediaMenuButton,
-  MediaOutlet,
-  MediaPlayer,
-  MediaPoster,
-  MediaSlider,
-  MediaSliderValue,
-  MediaSliderVideo,
-  MediaTimeSlider,
-  useMediaPlayer,
-  useMediaStore,
-} from "@vidstack/react";
+// import { MediaOutlet, MediaPlayer, MediaPoster, useMediaStore } from "@vidstack/react";
 import {
   HLSErrorEvent,
   MediaCanPlayEvent,
-  MediaErrorEvent,
   MediaPlayerElement,
   MediaProviderChangeEvent,
   isHLSProvider,
+  // MediaPlayerConnectEvent,
 } from "vidstack";
-import { ChaptersIcon } from "@vidstack/react/icons";
-import { useEffect, useRef, useState } from "react";
+// import { useEffect, useRef, useState } from "react";
 import { PipedVideo, Subtitle } from "~/types";
 import { chaptersVtt } from "~/utils/chapters";
 import { ttml2srt } from "~/utils/ttml";
-import PlayerSkin from "./player-skin/player-skin";
-import { $, useContext, useOnWindow, useSignal } from "@builder.io/qwik";
-import { DBContext, TranscriptContext } from "~/routes/layout";
+// import PlayerSkin from "./player-skin/player-skin";
 import { extractVideoId } from "~/routes/watch";
 import { RouteLocation, useLocation } from "@builder.io/qwik-city";
 import { IDBPDatabase } from "idb";
+import {
+  $,
+  QRL,
+  component$,
+  useOn,
+  useOnDocument,
+  useOnWindow,
+  useSignal,
+  useTask$,
+  useVisibleTask$,
+} from "@builder.io/qwik";
+import PlayerSkin from "./player-skin/player-skin";
 
 interface PlayerProps {
   video: PipedVideo | null | undefined;
@@ -57,66 +47,29 @@ const BUFFER_LIMIT = 3;
 const BUFFER_TIME = 15000;
 const TIME_SPAN = 300000;
 
-function Player({ video, isMiniPlayer = false, setTranscript, progress, route, db }: PlayerProps) {
-  const mediaPlayer = useRef<MediaPlayerElement | null>(null);
-  let vtt = "";
-  function onCanPlay(event: MediaCanPlayEvent) {
-    init();
-    console.log(event);
-    setError(undefined);
-    if (!video?.chapters) return;
-    if (!mediaPlayer) return;
-    let chapters = [];
-    for (let i = 0; i < video.chapters.length; i++) {
-      const chapter = video.chapters[i];
-      const name = chapter.title;
-      // seconds to 00:00:00
-      const timestamp = new Date(chapter.start * 1000).toISOString().slice(11, 22);
-      const seconds = video.chapters[i + 1]?.start - chapter.start ?? video.duration - chapter.start;
-      chapters.push({ name, timestamp, seconds });
-    }
+defineCustomElements();
 
-    vtt = chaptersVtt(chapters, video.duration);
-    if (vtt) {
-      mediaPlayer.current?.textTracks.add({
-        kind: "chapters",
-        default: true,
-        content: vtt,
-        type: "vtt",
-      });
-    }
-  }
-  function onProviderChange(event: MediaProviderChangeEvent) {
-    const provider = event.detail;
-    if (isHLSProvider(provider)) {
-      provider.library = () => import("hls.js");
-    }
-  }
-  const [subtitles, setSubtitles] = useState<Map<string, string>>();
-  useEffect(() => {
-    console.log("received new video");
-    if (!video?.subtitles) return;
-    const subs = new Map<string, string>();
-    video.subtitles.forEach((subtitle) => {
-      if (!subtitle.url) return;
-      subs.set(subtitle.code, subtitle.url);
-    });
-    setSubtitles(subs);
-  }, [video]);
+export default component$<PlayerProps>(({ video, isMiniPlayer = false, setTranscript, progress, route, db }) => {
+  const mediaPlayer = useSignal<MediaPlayerElement | undefined>(undefined);
 
-  async function handleTextTrackChange(e: any) {
-    console.log(e, "text track change");
-    // if (!e.detail?.language) return;
-    // const code = e.detail.language;
-    // const { srtUrl, srtText } = await ttml2srt(subtitles?.get(code) ?? "");
-    // setTranscript(srtText);
-    // const track = document.querySelector(`#track-${code}`) as HTMLTrackElement | undefined;
-    // console.log(track, code, srtUrl, "text track");
-    // if (!track) return;
-    // track.src = srtUrl;
-  }
+  const updateProgress = $(() => {
+    console.log("updating progress");
+    if (!video) return;
+    if (!mediaPlayer.value) return;
+    if (video.duration < 60) return;
+    if (video.category === "Music") return;
+    const currentTime = mediaPlayer.value.currentTime;
+    //eslint-disable-next-line qwik/valid-lexical-scope
+    const tx = db?.transaction("watch_history", "readwrite");
+    const store = tx?.objectStore("watch_history");
+    store?.put({ ...video, progress: currentTime }, extractVideoId(video.thumbnailUrl));
+    console.log(`updated progress for ${video.title} to ${currentTime}`);
+  });
+  useOnWindow("beforeunload", updateProgress);
 
-  const [error, setError] = useState<{
+  const vtt = useSignal<string | undefined>(undefined);
+
+  const error = useSignal<{
     name: string;
     details: string;
     fatal: boolean;
@@ -124,37 +77,13 @@ function Player({ video, isMiniPlayer = false, setTranscript, progress, route, d
     code: number | undefined;
   }>();
 
-  function handleHlsError(err: HLSErrorEvent) {
-    console.log(err.detail);
-    setError({
-      name: err.detail.error.name,
-      code: err.detail.response?.code,
-      details: err.detail.details,
-      fatal: err.detail.fatal,
-      message: err.detail.error.message,
-    });
-  }
-
-  function selectDefaultQuality() {
-    let preferredQuality = 1080; // TODO: get from user settings
-    if (!mediaPlayer.current) return;
-    console.log(mediaPlayer.current.qualities);
-    const q = mediaPlayer.current.qualities.toArray().find((q) => q.height >= preferredQuality);
-    console.log(q);
-    if (q) {
-      q.selected = true;
-    }
-  }
-  const pos = {
-    tl: "top-0 -left-72",
-  };
-
-  const { started } = useMediaStore(mediaPlayer);
-  const [tracks, setTracks] = useState<
+  const tracks = useSignal<
     { id: string; key: string; kind: string; src: string; srcLang: string; label: string; dataType: string }[]
   >([]);
 
-  const fetchSubtitles = async (subtitles: Subtitle[]) => {
+  const subtitles = useSignal<Map<string, string>>();
+
+  const fetchSubtitles = $(async (subtitles: Subtitle[]) => {
     console.time("fetching subtitles");
     const newTracks = await Promise.all(
       subtitles.map(async (subtitle) => {
@@ -184,13 +113,15 @@ function Player({ video, isMiniPlayer = false, setTranscript, progress, route, d
       })
     );
     console.timeEnd("fetching subtitles");
-    setTracks(newTracks.filter((track) => track !== null) as any);
-  };
-  async function init() {
+    tracks.value = newTracks.filter((track) => track !== null) as any;
+  });
+
+  const init = $(() => {
     if (!video) return;
     console.time("init");
     const time = route.url.searchParams.get("t");
 
+    //eslint-disable-next-line qwik/valid-lexical-scope
     console.log(time, "time", db, "db");
     if (time) {
       let start = 0;
@@ -210,72 +141,181 @@ function Player({ video, isMiniPlayer = false, setTranscript, progress, route, d
           start += parseInt(seconds);
         }
       }
-      if (mediaPlayer.current) mediaPlayer.current.currentTime = start;
+      if (mediaPlayer.value) mediaPlayer.value.currentTime = start;
       // this.initialSeekComplete = true;
+      //eslint-disable-next-line qwik/valid-lexical-scope
     } else if (db) {
+      //eslint-disable-next-line qwik/valid-lexical-scope
       const tx = db.transaction("watch_history", "readwrite");
       const store = tx.objectStore("watch_history");
-      const val = await store.get(extractVideoId(video?.thumbnailUrl ?? ""));
-      console.log(val, "val");
-      const currentTime = val?.progress;
-      if (currentTime) {
-        if (currentTime < video.duration * 0.9) {
-          if (mediaPlayer.current) mediaPlayer.current.currentTime = currentTime;
+      store.get(extractVideoId(video?.thumbnailUrl ?? "")).then((v) => {
+        console.log(v, "val");
+        const currentTime = v?.progress;
+        if (currentTime) {
+          if (currentTime < video.duration * 0.9) {
+            if (mediaPlayer.value) mediaPlayer.value.currentTime = currentTime;
+          }
         }
-      }
-      console.timeEnd("init");
+        console.timeEnd("init");
+      });
     }
     fetchSubtitles(video.subtitles);
+  });
+
+  const onCanPlay = $((event: Event) => {
+    console.log("can play");
+    console.log(event);
+    error.value = undefined;
+    init();
+    if (!video?.chapters) return;
+    if (!mediaPlayer.value) return;
+    let chapters = [];
+    for (let i = 0; i < video.chapters.length; i++) {
+      const chapter = video.chapters[i];
+      const name = chapter.title;
+      // seconds to 00:00:00
+      const timestamp = new Date(chapter.start * 1000).toISOString().slice(11, 22);
+      const seconds = video.chapters[i + 1]?.start - chapter.start ?? video.duration - chapter.start;
+      chapters.push({ name, timestamp, seconds });
+    }
+
+    vtt.value = chaptersVtt(chapters, video.duration);
+    if (vtt.value) {
+      mediaPlayer.value?.textTracks.add({
+        kind: "chapters",
+        default: true,
+        content: vtt.value,
+        type: "vtt",
+      });
+    }
+  });
+  useOnWindow("canplay", onCanPlay);
+  useOnDocument("media-player-connect", onCanPlay);
+
+  function onProviderChange(event: MediaProviderChangeEvent) {
+    const provider = event.detail;
+    if (isHLSProvider(provider)) {
+      provider.library = () => import("hls.js");
+    }
   }
 
-  async function updateProgress() {
-    console.log("updating progress");
-    if (!video) return;
-    if (!mediaPlayer.current) return;
-    if (video.duration < 60) return;
-    if (video.category === "Music") return;
-    const currentTime = mediaPlayer.current.currentTime;
-    const tx = db?.transaction("watch_history", "readwrite");
-    const store = tx?.objectStore("watch_history");
-    await store?.put({ ...video, progress: currentTime }, extractVideoId(video.thumbnailUrl));
-    console.log(`updated progress for ${video.title} to ${currentTime}`);
+  useTask$(({ track }) => {
+    console.log("received new video");
+    if (!video?.subtitles) return;
+    const subs = new Map<string, string>();
+    video.subtitles.forEach((subtitle) => {
+      if (!subtitle.url) return;
+      subs.set(subtitle.code, subtitle.url);
+    });
+    subtitles.value = subs;
+    track(() => video.subtitles);
+  });
+
+  useVisibleTask$(({ cleanup }) => {
+    if (!mediaPlayer.value) return;
+    mediaPlayer.value.addEventListener("media-player-connect", onCanPlay);
+    mediaPlayer.value.addEventListener("can-play", onCanPlay);
+
+    cleanup(() => {
+      if (!mediaPlayer.value) return;
+      mediaPlayer.value.removeEventListener("media-player-connect", onCanPlay);
+      mediaPlayer.value.removeEventListener("can-play", onCanPlay);
+    });
+  });
+
+  async function handleTextTrackChange(e: any) {
+    console.log(e, "text track change");
+    // if (!e.detail?.language) return;
+    // const code = e.detail.language;
+    // const { srtUrl, srtText } = await ttml2srt(subtitles?.get(code) ?? "");
+    // setTranscript(srtText);
+    // const track = document.querySelector(`#track-${code}`) as HTMLTrackElement | undefined;
+    // console.log(track, code, srtUrl, "text track");
+    // if (!track) return;
+    // track.src = srtUrl;
   }
 
-  useEffect(() => {
-    window.addEventListener("beforeunload", updateProgress);
-    return () => {
-      window.removeEventListener("beforeunload", updateProgress);
+  function handleHlsError(err: HLSErrorEvent) {
+    console.log(err.detail);
+    error.value = {
+      name: err.detail.error.name,
+      code: err.detail.response?.code,
+      details: err.detail.details,
+      fatal: err.detail.fatal,
+      message: err.detail.error.message,
     };
-  }, []);
+  }
 
-  useEffect(() => {
-    console.log("route changed updating progress");
-    updateProgress();
-  }, [started, route]);
+  function selectDefaultQuality() {
+    let preferredQuality = 1080; // TODO: get from user settings
+    if (!mediaPlayer.value) return;
+    console.log(mediaPlayer.value.qualities);
+    const q = mediaPlayer.value.qualities.toArray().find((q) => q.height >= preferredQuality);
+    console.log(q);
+    if (q) {
+      q.selected = true;
+    }
+  }
+  const pos = {
+    tl: "top-0 -left-72",
+  };
+
+  // const { started } = useMediaStore(mediaPlayer);
+
+  // useEffect(() => {
+  //   console.log("route changed updating progress");
+  //   updateProgress();
+  // }, [started, route]);
+
+  // return (
+  //   <media-player
+  //     ref={mediaPlayer}
+  //     title="Sprite Fight"
+  //     src="https://stream.mux.com/VZtzUzGRv02OhRnZCxcNg49OilvolTqdnFLEqBsTwaxU.m3u8"
+  //     poster="https://image.mux.com/VZtzUzGRv02OhRnZCxcNg49OilvolTqdnFLEqBsTwaxU/thumbnail.webp?time=268&width=980"
+  //     thumbnails="https://media-files.vidstack.io/sprite-fight/thumbnails.vtt"
+  //     aspect-ratio="16/9"
+  //     crossorigin
+  //   >
+  //     <media-outlet>
+  //       <media-poster alt="Girl walks into sprite gnomes around her friend on a campfire in danger!"></media-poster>
+  //       <track
+  //         src="https://media-files.vidstack.io/sprite-fight/subs/english.vtt"
+  //         label="English"
+  //         lang="en-US"
+  //         kind="subtitles"
+  //         default
+  //       />
+  //     </media-outlet>
+  //     {/* <media-community-skin></media-community-skin> */}
+  //     <PlayerSkin video={video} isMiniPlayer={false} />
+  //   </media-player>
+  // );
 
   return (
-    <MediaPlayer
-      onDestroy={() => console.log("destroyed")}
-      currentTime={progress}
-      onTextTrackChange={handleTextTrackChange}
+    <media-player
+      // onDestroy={() => console.log("destroyed")}
+      // currentTime={progress}
+      // onTextTrackChange={handleTextTrackChange}
       load="eager"
-      // className={
+      // class={
       //   isMiniPlayer ?  `fixed z-[99999] ${pos.tl} scale-[0.4]` : ""
       // }
+      key-target="document"
       autoplay
       ref={mediaPlayer}
-      onProviderChange={onProviderChange}
-      onCanPlay={onCanPlay}
+      // onProviderChange={onProviderChange}
+      // onCanPlay={onCanPlay}
       title={video?.title ?? ""}
       src={video?.hls ?? ""}
       poster={video?.thumbnailUrl ?? ""}
-      aspectRatio={16 / 9}
-      onHlsError={handleHlsError}
+      aspect-ratio={16 / 9}
+      // onHlsError={handleHlsError}
       crossorigin="anonymous"
     >
-      <MediaOutlet>
-        <MediaPoster alt={video?.title ?? ""} />
-        {tracks.map((track) => {
+      <media-outlet>
+        <media-poster alt={video?.title ?? ""} />
+        {tracks.value.map((track) => {
           return (
             <track
               id={track.id}
@@ -296,31 +336,29 @@ function Player({ video, isMiniPlayer = false, setTranscript, progress, route, d
           label="Transcript"
           data-type="srt"
         /> */}
-        {/* <MediaCaptions className="transition-[bottom] not-can-control:opacity-100 user-idle:opacity-100 not-user-idle:bottom-[80px]" /> */}
-      </MediaOutlet>
-      {error?.fatal ? (
-        <div className="absolute top-0 right-0 w-full h-full opacity-100 pointer-events-auto bg-black/50">
-          <div className="flex flex-col items-center justify-center w-full h-full gap-3">
-            <div className="text-2xl font-bold text-white">
-              {error.name} {error.details}
+        {/* <MediaCaptions class="transition-[bottom] not-can-control:opacity-100 user-idle:opacity-100 not-user-idle:bottom-[80px]" /> */}
+      </media-outlet>
+      {error.value?.fatal ? (
+        <div class="absolute top-0 right-0 w-full h-full opacity-100 pointer-events-auto bg-black/50">
+          <div class="flex flex-col items-center justify-center w-full h-full gap-3">
+            <div class="text-2xl font-bold text-white">
+              {error.value.name} {error.value.details}
             </div>
-            <div className="flex flex-col">
-              <div className="text-lg text-white">{error.message}</div>
-              <div className="text-lg text-white">
-                Please try switching to a different instance or refresh the page.
-              </div>
+            <div class="flex flex-col">
+              <div class="text-lg text-white">{error.value.message}</div>
+              <div class="text-lg text-white">Please try switching to a different instance or refresh the page.</div>
             </div>
-            <div className="flex justify-center gap-2">
+            <div class="flex justify-center gap-2">
               <button
-                className="px-4 py-2 text-lg text-white border border-white rounded-md"
-                onClick={() => window.location.reload()}
+                class="px-4 py-2 text-lg text-white border border-white rounded-md"
+                // onClick={() => window.location.reload()}
               >
                 Refresh
               </button>
               <button
-                className="px-4 py-2 text-lg text-white border border-white rounded-md"
-                onClick={() => {
-                  setError(undefined);
+                class="px-4 py-2 text-lg text-white border border-white rounded-md"
+                onClick$={() => {
+                  error.value = undefined;
                 }}
               >
                 Close
@@ -330,19 +368,15 @@ function Player({ video, isMiniPlayer = false, setTranscript, progress, route, d
         </div>
       ) : (
         <></>
-        // <div className="absolute top-0 right-0 opacity-0 pointer-events-none bg-black/50">
-        //   <div className="absolute top-0 right-0 z-10 flex flex-col justify-between w-full h-full text-white transition-opacity duration-200 ease-linear opacity-0 pointer-events-none can-control:opacity-100">
-        //     <div className="text-sm text-white">Buffering?</div>
-        //     <div className="text-xs text-white">Try switching to a different instance.</div>
+        // <div class="absolute top-0 right-0 opacity-0 pointer-events-none bg-black/50">
+        //   <div class="absolute top-0 right-0 z-10 flex flex-col justify-between w-full h-full text-white transition-opacity duration-200 ease-linear opacity-0 pointer-events-none can-control:opacity-100">
+        //     <div class="text-sm text-white">Buffering?</div>
+        //     <div class="text-xs text-white">Try switching to a different instance.</div>
         //   </div>
         // </div>
       )}
       <PlayerSkin video={video} isMiniPlayer={isMiniPlayer} />
       {/* <MediaCommunitySkin /> */}
-    </MediaPlayer>
+    </media-player>
   );
-}
-
-export const QPlayer = qwikify$(Player, {
-  eagerness: "visible",
 });

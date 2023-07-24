@@ -17,7 +17,6 @@ import type { RequestHandler } from "@builder.io/qwik-city";
 
 import Header from "~/components/header/header";
 import Footer from "~/components/footer/footer";
-import { QPlayer } from "~/components/player";
 import { PipedInstance, PipedVideo } from "~/types";
 import exp from "constants";
 import { extractVideoId, fetchWithTimeout } from "./watch";
@@ -25,6 +24,7 @@ import { srtToHtml } from "~/utils/ttml";
 import usePreferences, { Preferences, useCookie } from "~/hooks/usePreferences";
 import { IDBPDatabase, openDB } from "idb";
 import VideoCard from "~/components/VideoCard";
+import Player from "~/components/player";
 
 export const onGet: RequestHandler = async ({ cacheControl }) => {
   // Control caching for this request for best performance and to reduce hosting costs:
@@ -132,11 +132,11 @@ export const useInstance = routeLoader$(async () => {
     timeout: 8000,
   })
     .then((res) => {
-      console.log("INSTANCES", res);
+      console.log("INSTANCES", res.status);
       return res.json();
     })
     .catch((err) => {
-      console.log("INSTANCES ERROR", err);
+      console.log("INSTANCES ERROR", err.message);
       return err as Error;
     });
 });
@@ -217,7 +217,7 @@ export default component$(() => {
         <div class="w-full h-full flex">
           <div class="w-full sm:w-[calc(100%-26rem)] max-h-full aspect-video">
             {video.value || persistedVideo.value ? (
-              <QPlayer
+              <Player
                 video={video.value ?? persistedVideo.value}
                 progress={
                   prefs.value?.videos[extractVideoId(video.value?.thumbnailUrl ?? "")] ??
